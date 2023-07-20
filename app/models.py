@@ -8,7 +8,7 @@ Base = declarative_base()
 
 @generic_repr
 class Business(Base, Timestamp):
-    __tablename__ = "businesses"
+    __tablename__ = "business"
 
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     name = Column(String(100), nullable=False)
@@ -19,7 +19,7 @@ class Business(Base, Timestamp):
 
 @generic_repr
 class Symptom(Base, Timestamp):
-    __tablename__ = "symptoms"
+    __tablename__ = "symptom"
 
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     code = Column(String(10), nullable=False)
@@ -32,14 +32,15 @@ class Symptom(Base, Timestamp):
 # Define the Diagnosis table
 @generic_repr
 class Diagnosis(Base, Timestamp):
-    __tablename__ = 'diagnoses'
+    __tablename__ = 'diagnosis'
+
     id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     business_id = Column(Integer, ForeignKey('businesses.id'), nullable=False)
-    symptom_id = Column(Integer, ForeignKey('symptoms.id'), nullable=False)
+    symptom_id = Column(Integer, ForeignKey('symptom.id'), nullable=False)
     is_diagnosed = Column(Boolean, nullable=False)
 
     # Define the relationship between Diagnosis and Business
-    business = relationship("Business", backref="diagnoses")
+    business = relationship("Business", backref="diagnosis")
 
     # Define the relationship between Diagnosis and Symptom
-    symptom = relationship("Symptom", backref="diagnoses")
+    symptom = relationship("Symptom", backref="diagnosis")
