@@ -44,7 +44,7 @@ async def update_db(data, db: AsyncSession):
     for row in data:
 
         business_id = int(row['Business ID'])
-        if business_id not in existing_businesses_dict:
+        if business_id not in business_mappings:
             business = Business(business_id=business_id, name=row['Business Name'])
             db.add(business)
             await db.flush()
