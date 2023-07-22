@@ -35,7 +35,7 @@ class Business(Base):   # Timestamp
     # name = Column(String(100), nullable=False)
 
     # Define the relationship between Diagnosis and Business
-    diagnoses: Mapped[List[Diagnosis]] = relationship(backref="business")
+    diagnoses: Mapped[List[Diagnosis]] = relationship(backref="business")   # , lazy='selectin'
     # diagnoses = relationship("Diagnosis", backref="business")
 
 
@@ -44,14 +44,14 @@ class Symptom(Base):    # Timestamp
     __tablename__ = "symptom"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, unique=True)
-    code: Mapped[int] = mapped_column(nullable=False, unique=True, index=True)
+    code: Mapped[str] = mapped_column(nullable=False, unique=True, index=True)
     name: Mapped[str] = mapped_column(nullable=False)
     # id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     # code = Column(String(9), nullable=False, unique=True, index=True)  # put validation for 'SYMPT' prefix
     # name = Column(String(100), nullable=False)
 
     # Define the relationship between Diagnosis and Symptom
-    diagnoses: Mapped[List[Diagnosis]] = relationship(backref="symptom")
+    diagnoses: Mapped[List[Diagnosis]] = relationship(backref="symptom")    # , lazy='selectin'
     # diagnoses = relationship("Diagnosis", backref="symptom")
 #
 # @generic_repr
