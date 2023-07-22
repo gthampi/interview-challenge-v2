@@ -3,6 +3,7 @@ from http import HTTPStatus
 
 from fastapi.params import Depends, Query
 from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 import controller
 import pandas as pd
@@ -19,7 +20,7 @@ router = APIRouter()
 @router.get('/diagnoses')
 async def get(business_id: Optional[int] = Query(None, alias="business_id"),
               diagnostic: Optional[bool] = Query(None, alias="diagnostic"),
-              db: Session = Depends(controller.get_db)):
+              db: AsyncSession = Depends(controller.get_db)):
     try:
         # Call the function to get the data from the database based on the provided parameters
         diagnoses_data = controller.get_diagnoses_by_params(business_id, diagnostic, db)
@@ -29,8 +30,8 @@ async def get(business_id: Optional[int] = Query(None, alias="business_id"),
         return {'Error': str(e)}
 
 
-@router.post("/import_csv")  # make this put
-async def post(file: UploadFile = File(...), db: Session = Depends(controller.get_db)):
+@router.post("/import_csv", status_code=HTTPStatus.CREATED)  # make this put
+async def post(file: UploadFile = File(...), db: AsyncSession = Depends(controller.get_db)):
     # TODO: can do some kind of chunking or use shutil for memory buffer
     try:
         if file.content_type != 'text/csv':
@@ -40,7 +41,7 @@ async def post(file: UploadFile = File(...), db: Session = Depends(controller.ge
         # df = pd.DataFrame.from_records(contents)
         data = list(csv.DictReader(contents.decode('utf-8').splitlines()))
 
-        controller.update_db(data, db)
+        await controller.update_db(data, db)
 
     except IOError:
         return JSONResponse(status_code=500, content={"message": "There was an error reading the file"})
