@@ -1,6 +1,8 @@
+import datetime
 from typing import List
 
 from sqlalchemy import Column, DateTime, Integer, String, ForeignKey, Boolean
+from sqlalchemy.sql import func
 from sqlalchemy_utils import generic_repr, Timestamp
 from sqlalchemy.orm import mapped_column, relationship, Mapped
 from app.database import Base
@@ -17,6 +19,14 @@ class Diagnosis(Base):  # Timestamp
     business_id: Mapped[int] = mapped_column(ForeignKey("business.id"))
     symptom_id: Mapped[int] = mapped_column(ForeignKey("symptom.id"))
     is_diagnosed: Mapped[bool] = mapped_column(nullable=False)
+
+    # metadata
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
+                                                          nullable=False)
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_onupdate=func.now(),
+                                                          nullable=True)
+    created_by: Mapped[str] = mapped_column(default=DB_USER, nullable=False)
+    updated_by: Mapped[str] = mapped_column(onupdate=DB_USER, nullable=True)
     # id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     # business_id = Column(Integer, ForeignKey('business.id'), nullable=False)
     # symptom_id = Column(Integer, ForeignKey('symptom.id'), nullable=False)
@@ -30,6 +40,14 @@ class Business(Base):   # Timestamp
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, unique=True)
     business_id: Mapped[int] = mapped_column(nullable=False, unique=True, index=True)
     name: Mapped[str] = mapped_column(nullable=False)
+
+    # metadata
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
+                                                          nullable=False)
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_onupdate=func.now(),
+                                                          nullable=True)
+    created_by: Mapped[str] = mapped_column(default=DB_USER, nullable=False)
+    updated_by: Mapped[str] = mapped_column(onupdate=DB_USER, nullable=True)
     # id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     # business_id = Column(Integer, nullable=False, unique=True, index=True)
     # name = Column(String(100), nullable=False)
@@ -46,9 +64,17 @@ class Symptom(Base):    # Timestamp
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, unique=True)
     code: Mapped[str] = mapped_column(nullable=False, unique=True, index=True)
     name: Mapped[str] = mapped_column(nullable=False)
+    # metadata
+    created_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
+                                                          nullable=False)
+    updated_at: Mapped[datetime.datetime] = mapped_column(DateTime(timezone=True), server_onupdate=func.now(),
+                                                          nullable=True)
+    created_by: Mapped[str] = mapped_column(default=DB_USER, nullable=False)
+    updated_by: Mapped[str] = mapped_column(onupdate=DB_USER, nullable=True)
     # id = Column(Integer, primary_key=True, autoincrement=True, unique=True)
     # code = Column(String(9), nullable=False, unique=True, index=True)  # put validation for 'SYMPT' prefix
     # name = Column(String(100), nullable=False)
+
 
     # Define the relationship between Diagnosis and Symptom
     diagnoses: Mapped[List[Diagnosis]] = relationship(backref="symptom")    # , lazy='selectin'
