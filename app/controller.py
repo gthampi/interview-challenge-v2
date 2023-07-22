@@ -1,8 +1,5 @@
-import asyncio
-
 from sqlalchemy import select
-from sqlalchemy.ext.asyncio import async_sessionmaker, AsyncSession
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import SessionLocal
 from app.models import Business, Symptom, Diagnosis
@@ -27,20 +24,10 @@ async def update_db(data, db: AsyncSession):
         csv_business_ids.add(int(row['Business ID']))
         csv_symptom_codes.add(row['Symptom Code'])
 
-    # existing_businesses = await asyncio.gather(db.query(Business).filter(Business.business_id.in_(csv_business_ids)).all())
-    # use ensure future instead of create task when we don't need to implement custom event loop
-
-    # get_existing_business_mappings_task = asyncio.ensure_future(get_business_id_mapping(csv_business_ids, db))
-    # get_existing_symptoms_mappings_task = asyncio.ensure_future(get_symptom_code_mapping(csv_symptom_codes, db))
-    #
-    diagnoses_to_insert = []
-    # -- causes cold start, looking into sharing the session during concurrency
-    # business_mappings = await get_existing_business_mappings_task
-    # symptom_mappings = await get_existing_symptoms_mappings_task
-
     business_mappings = await get_business_id_mapping(csv_business_ids, db)
     symptom_mappings = await get_symptom_code_mapping(csv_symptom_codes, db)
 
+    diagnoses_to_insert = []
     for row in data:
 
         business_id = int(row['Business ID'])
@@ -48,24 +35,20 @@ async def update_db(data, db: AsyncSession):
             business = Business(business_id=business_id, name=row['Business Name'])
             db.add(business)
             await db.flush()
-            # update dict with new record
             business_mappings[business_id] = business.id
 
         if row['Symptom Code'] not in symptom_mappings:
-            # change to one-liner
             symptom = Symptom(code=row['Symptom Code'], name=row['Symptom Name'])
             db.add(symptom)
             await db.flush()
-            # update dict with new record
             symptom_mappings[row['Symptom Code']] = symptom.id
 
-        # TODO: write logic to save is_diagnosed
-        diagnosis = Diagnosis(is_diagnosed=True,
+        diagnosis = Diagnosis(is_diagnosed=parse_is_diagnosed(row['Symptom Diagnostic']),
                               business_id=business_mappings[business_id],
                               symptom_id=symptom_mappings[row['Symptom Code']])
         diagnoses_to_insert.append(diagnosis)
 
-    # using add_all instead of the Legacy API for bulk insert mappings
+    # using add_all (orm) instead of the Legacy API (core) for bulk insert mappings
     # https://github.com/sqlalchemy/sqlalchemy/discussions/6935#discussioncomment-1233465
     db.add_all(diagnoses_to_insert)
 
@@ -88,3 +71,12 @@ async def get_symptom_code_mapping(codes_from_csv: set, db: AsyncSession):
     existing_symptoms = await db.execute(existing_symptoms_statement)
     existing_symptoms_dict = {symptom.code: symptom.id for symptom in existing_symptoms.scalars().all()}
     return existing_symptoms_dict
+
+
+def parse_is_diagnosed(value: str):
+    value_lower = value.lower()
+    if value_lower == "true" or value_lower == "yes":
+        return True
+    elif value_lower == "false" or value_lower == "no":
+        return False
+    raise ValueError("Invalid bool-like string for Symptom Diagnostic")
