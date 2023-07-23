@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,8 +15,19 @@ async def get_db():
         await db.close()
 
 
-async def get_diagnoses_by_params(business_id, diagnostic, db: AsyncSession):
-    pass
+async def get_diagnoses_by_params(db: AsyncSession, business_id: Optional[int] = None, is_diagnosed: Optional[bool] = None):
+    diagnoses_query = select(Diagnosis)
+    if is_diagnosed is not None:
+        diagnoses_query = diagnoses_query.filter(Diagnosis.is_diagnosed == is_diagnosed)
+    if business_id is not None:
+        diagnoses_query = diagnoses_query.join(Business).filter(Business.business_id == business_id)
+    diagnoses_query.join(Symptom)
+
+    results = await db.execute(diagnoses_query)
+    diagnoses = results.scalars().all()
+
+    # move to a separate file and obj later
+    return {'data': diagnoses}
 
 
 async def update_db(data, db: AsyncSession):
