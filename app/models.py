@@ -12,7 +12,7 @@ from settings import DB_USER
 # Define the Diagnosis table
 @generic_repr
 class Diagnosis(Base):
-    __tablename__ = 'diagnosis'
+    __tablename__ = "diagnosis"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True, unique=True)
     business_id: Mapped[int] = mapped_column(ForeignKey("business.id"))
@@ -20,10 +20,12 @@ class Diagnosis(Base):
     is_diagnosed: Mapped[bool] = mapped_column(nullable=False)
 
     # metadata
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
-                                                 nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_onupdate=func.now(),
-                                                 nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_onupdate=func.now(), nullable=True
+    )
     created_by: Mapped[str] = mapped_column(default=DB_USER, nullable=False)
     updated_by: Mapped[str] = mapped_column(onupdate=DB_USER, nullable=True)
 
@@ -37,10 +39,12 @@ class Business(Base):  # Timestamp
     name: Mapped[str] = mapped_column(nullable=False)
 
     # metadata
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
-                                                 nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_onupdate=func.now(),
-                                                 nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_onupdate=func.now(), nullable=True
+    )
     created_by: Mapped[str] = mapped_column(default=DB_USER, nullable=False)
     updated_by: Mapped[str] = mapped_column(onupdate=DB_USER, nullable=True)
 
@@ -57,10 +61,12 @@ class Symptom(Base):  # Timestamp
     name: Mapped[str] = mapped_column(nullable=False)
 
     # metadata
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now(),
-                                                 nullable=False)
-    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_onupdate=func.now(),
-                                                 nullable=True)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_default=func.now(), nullable=False
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), server_onupdate=func.now(), nullable=True
+    )
     created_by: Mapped[str] = mapped_column(default=DB_USER, nullable=False)
     updated_by: Mapped[str] = mapped_column(onupdate=DB_USER, nullable=True)
 
