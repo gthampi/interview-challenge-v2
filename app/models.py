@@ -9,7 +9,6 @@ from app.database import Base
 from settings import DB_USER
 
 
-# Define the Diagnosis table
 @generic_repr
 class Diagnosis(Base):
     __tablename__ = "diagnosis"
